@@ -30,5 +30,13 @@
     <!-- MainActivity -->
     <string name="title_resents">通话记录</string>
     <string name="title_contacts">联系人</string>
+    <string name="intent_extra_has_login">has_login</string>
+
+    <!-- RecentCallsFragment -->
+    <string name="label_called_account_input_hint">输入被呼叫号码</string>
+    <string name="ib_add_called_party_description">添加被呼叫人</string>
+    <string name="label_start_calling_btn">发起视频会议</string>
+    <string name="logout">注销</string>
+    <string name="label_logout_success">注销成功</string>
 
 </resources>

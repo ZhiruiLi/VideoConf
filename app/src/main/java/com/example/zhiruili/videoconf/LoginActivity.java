@@ -3,15 +3,12 @@ package com.example.zhiruili.videoconf;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 
@@ -25,6 +22,12 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
+import static com.example.zhiruili.videoconf.utils.TextUtils.isPasswordValid;
+import static com.example.zhiruili.videoconf.utils.TextUtils.isUserNameValid;
+
+/**
+ * 注册登录页
+ */
 public class LoginActivity extends AppCompatActivity {
 
     private static final String TAG = LoginActivity.class.getSimpleName();
@@ -170,24 +173,14 @@ public class LoginActivity extends AppCompatActivity {
                             }
                             mLoginDisposable = null;
                         }
-
                 );
     }
 
     private void gotoMain() {
         Intent intent = new Intent();
         intent.setClass(this, MainActivity.class);
+        intent.putExtra(getString(R.string.intent_extra_has_login), true);
         startActivity(intent);
-    }
-
-    private boolean isUserNameValid(String userName) {
-        return userName.length() >= 4 &&
-                userName.length() <= 24 &&
-                userName.matches("^[A-Za-z0-9]*[A-Za-z][A-Za-z0-9]*$");
-    }
-
-    private boolean isPasswordValid(String password) {
-        return password.length() >= 8 && password.length() <= 16 && password.matches("^[A-Za-z0-9]*$");
     }
 
     private void showProgress(final boolean show) {
@@ -195,6 +188,5 @@ public class LoginActivity extends AppCompatActivity {
         ViewUtils.animShowOrHideView(mLoginFormView, !show, shortAnimTime);
         ViewUtils.animShowOrHideView(mProgressView, show, shortAnimTime);
     }
-
 }
 

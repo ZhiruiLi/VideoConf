@@ -54,7 +54,7 @@ public final class ILiveHelper {
      * @param userSig   用户签名
      * @return  返回 Single 对象，成功时向监听者传递签名，错误时向监听者传递 AccountException 对象
      */
-    public static Single<String> loginBySign(final String userName, final String userSig){
+    public static Single<String> loginBySign(final String userName, final String userSig) {
 
         ILiveLoginManager manager = ILiveLoginManager.getInstance();
 
@@ -71,5 +71,29 @@ public final class ILiveHelper {
                         source.onError(new AccountException("Login failed", module, errCode, errMsg));
                     }
                 }));
+    }
+
+    /**
+     * 注销登录
+     * @return 返回
+     */
+    public static Single<Boolean> logout() {
+
+        ILiveLoginManager manager = ILiveLoginManager.getInstance();
+
+        return Single.create(source -> manager
+                .iLiveLogout(new ILiveCallBack() {
+
+                    @Override
+                    public void onSuccess(Object data) {
+                        source.onSuccess(true);
+                    }
+
+                    @Override
+                    public void onError(String module, int errCode, String errMsg) {
+                        source.onError(new AccountException(module, errCode, errMsg));
+                    }
+                })
+        );
     }
 }

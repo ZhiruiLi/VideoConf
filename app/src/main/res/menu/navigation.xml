@@ -2,7 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/navigation_resents"
+        android:id="@+id/navigation_recent_calls"
         android:icon="@drawable/ic_format_list_bulleted_black_24dp"
         android:title="@string/title_resents" />
 
