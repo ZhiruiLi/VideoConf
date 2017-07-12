@@ -13,6 +13,13 @@ import android.view.MenuItem;
 import android.view.ViewGroup;
 
 import com.example.zhiruili.videoconf.account.ILiveHelper;
+import com.tencent.callsdk.ILVCallConfig;
+import com.tencent.callsdk.ILVCallListener;
+import com.tencent.callsdk.ILVCallManager;
+import com.tencent.callsdk.ILVCallNotification;
+import com.tencent.callsdk.ILVCallNotificationListener;
+import com.tencent.callsdk.ILVIncomingListener;
+import com.tencent.callsdk.ILVIncomingNotification;
 
 import java.util.List;
 
@@ -24,7 +31,7 @@ import io.reactivex.schedulers.Schedulers;
  */
 public class MainActivity
         extends AppCompatActivity
-        implements RecentCallsFragment.OnFragmentInteractionListener {
+        implements RecentCallsFragment.OnFragmentInteractionListener, ILVCallNotificationListener, ILVIncomingListener, ILVCallListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
@@ -72,6 +79,7 @@ public class MainActivity
         if (mHasLogin) {
             Log.v(TAG, "User has login");
             initViews();
+            initCallSdk();
             return;
         }
         // 确认是否有登录信息
@@ -90,6 +98,7 @@ public class MainActivity
                                 Log.v(TAG, "login success");
                                 mHasLogin = true;
                                 initViews();
+                                initCallSdk();
                             },
                             err -> {
                                 Log.e(TAG, "login fail", err);
@@ -104,6 +113,16 @@ public class MainActivity
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         navigation.setSelectedItemId(R.id.navigation_recent_calls);
+    }
+
+    private void initCallSdk() {
+        ILVCallManager
+                .getInstance()
+                .init(new ILVCallConfig()
+                        .setNotificationListener(this)
+                        .setAutoBusy(true));
+        ILVCallManager.getInstance().addIncomingListener(this);
+        ILVCallManager.getInstance().addCallListener(this);
     }
 
     private void bindViews() {
@@ -126,11 +145,12 @@ public class MainActivity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_logout) {
-            logout();
-            return true;
-        } else {
-            return super.onOptionsItemSelected(item);
+        switch (item.getItemId()) {
+            case R.id.action_logout:
+                logout();
+                return true;
+            default:
+                return false;
         }
     }
 
@@ -181,10 +201,31 @@ public class MainActivity
 
     @Override
     public void startCalling(List<String> calledAccounts) {
-        StringBuilder builder = new StringBuilder();
-        for (String s : calledAccounts) {
-            builder.append(s).append(", ");
-        }
-        Snackbar.make(mMainContainer, builder.toString(), Snackbar.LENGTH_SHORT).show();
+
+    }
+
+    @Override
+    public void onRecvNotification(int callId, ILVCallNotification notification) {
+        Log.d(TAG, "onRecvNotification, callId: " + callId);
+    }
+
+    @Override
+    public void onNewIncomingCall(int callId, int callType, ILVIncomingNotification notification) {
+        Log.d(TAG, "onNewIncomingCall, callId: " + callId + ", callType: " + callType);
+    }
+
+    @Override
+    public void onCallEstablish(int callId) {
+        Log.d(TAG, "onCallEstablish, callId: " + callId);
+    }
+
+    @Override
+    public void onCallEnd(int callId, int endResult, String endInfo) {
+        Log.d(TAG, "onCallEnd, callId: " + callId + ", endResult: " + endResult);
+    }
+
+    @Override
+    public void onException(int iExceptionId, int errCode, String errMsg) {
+        Log.d(TAG, "onException, exceptionId: " + iExceptionId + ", errorCode: " + errCode + ", errMsg: " + errMsg);
     }
 }
