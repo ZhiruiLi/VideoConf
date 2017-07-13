@@ -3,7 +3,7 @@ package com.example.zhiruili.videoconf;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
-public class CallActivity
+public final class CallActivity
         extends AppCompatActivity
         implements CallFragment.OnFragmentInteractionListener {
 

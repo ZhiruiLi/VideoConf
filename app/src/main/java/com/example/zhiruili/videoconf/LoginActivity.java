@@ -28,7 +28,7 @@ import static com.example.zhiruili.videoconf.utils.TextUtils.isUserNameValid;
 /**
  * 注册登录页
  */
-public class LoginActivity extends AppCompatActivity {
+public final class LoginActivity extends AppCompatActivity {
 
     private static final String TAG = LoginActivity.class.getSimpleName();
 

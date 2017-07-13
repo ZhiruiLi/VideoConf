@@ -29,9 +29,12 @@ import io.reactivex.schedulers.Schedulers;
 /**
  * 应用主界面
  */
-public class MainActivity
+public final class MainActivity
         extends AppCompatActivity
-        implements RecentCallsFragment.OnFragmentInteractionListener, ILVCallNotificationListener, ILVIncomingListener, ILVCallListener {
+        implements
+        ToCallBufferFragment.OnFragmentInteractionListener,
+        RecentCallsFragment.OnFragmentInteractionListener,
+        ILVCallNotificationListener, ILVIncomingListener, ILVCallListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 

@@ -39,4 +39,7 @@
     <string name="logout">注销</string>
     <string name="label_logout_success">注销成功</string>
 
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
 </resources>
