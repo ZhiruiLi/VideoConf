@@ -67,12 +67,11 @@ public final class CallActivity
 
     @Override
     public void onActionEndCall(int callId, String sponsor, ArrayList<String> members) {
-        finish();
+        ILVCallManager.getInstance().endCall(callId);
     }
 
     @Override
     public void onCreateAvRootView(AVRootView avView) {
-
         mAvRootView = avView;
         ILVCallManager.getInstance().initAvView(mAvRootView);
     }
@@ -120,7 +119,6 @@ public final class CallActivity
     @Override
     public void onCallEnd(int callId, int endResult, String endInfo) {
         Log.d(TAG, "onCallEnd, callId: " + callId + ", endResult: " + endResult + ", " + endInfo);
-        ILVCallManager.getInstance().endCall(callId);
         finish();
     }
 
