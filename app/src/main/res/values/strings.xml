@@ -1,8 +1,10 @@
 <resources>
-    <string name="app_name">视频会议 Demo</string>
-    <string name="label_login_header">用户登录</string>
 
-    <!-- Strings related to login -->
+    <!-- App -->
+    <string name="app_name">视频会议 Demo</string>
+
+    <!-- LoginActivity -->
+    <string name="label_login_header">用户登录</string>
     <string name="prompt_user_name">用户名</string>
     <string name="prompt_password">密码</string>
     <string name="action_login">登录</string>
@@ -30,16 +32,19 @@
     <!-- MainActivity -->
     <string name="title_resents">通话记录</string>
     <string name="title_contacts">联系人</string>
-    <string name="intent_extra_has_login">has_login</string>
+    <string name="intent_extra_has_login" translatable="false">has_login</string>
 
-    <!-- RecentCallsFragment -->
-    <string name="label_called_account_input_hint">输入被呼叫号码</string>
+    <!-- CallActivity -->
+    <string name="intent_extra_sponsor" translatable="false">sponsor</string>
+    <string name="intent_extra_call_id" translatable="false">call_id</string>
+    <string name="intent_extra_call_type" translatable="false">call_type</string>
+    <string name="intent_extra_members" translatable="false">members</string>
+
+    <!-- ToCallBufferFragment -->
+    <string name="label_called_id_input_hint">输入被呼叫号码</string>
     <string name="ib_add_called_party_description">添加被呼叫人</string>
     <string name="label_start_calling_btn">发起视频会议</string>
     <string name="logout">注销</string>
     <string name="label_logout_success">注销成功</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

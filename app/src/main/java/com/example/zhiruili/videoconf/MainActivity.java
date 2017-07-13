@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -14,14 +15,16 @@ import android.view.ViewGroup;
 
 import com.example.zhiruili.videoconf.account.ILiveHelper;
 import com.tencent.callsdk.ILVCallConfig;
+import com.tencent.callsdk.ILVCallConstants;
 import com.tencent.callsdk.ILVCallListener;
 import com.tencent.callsdk.ILVCallManager;
 import com.tencent.callsdk.ILVCallNotification;
 import com.tencent.callsdk.ILVCallNotificationListener;
 import com.tencent.callsdk.ILVIncomingListener;
 import com.tencent.callsdk.ILVIncomingNotification;
+import com.tencent.ilivesdk.core.ILiveLoginManager;
 
-import java.util.List;
+import java.util.ArrayList;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -33,7 +36,6 @@ public final class MainActivity
         extends AppCompatActivity
         implements
         ToCallBufferFragment.OnFragmentInteractionListener,
-        RecentCallsFragment.OnFragmentInteractionListener,
         ILVCallNotificationListener, ILVIncomingListener, ILVCallListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -54,10 +56,7 @@ public final class MainActivity
             return false;
         }
         if (itemId == R.id.navigation_recent_calls) {
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.content_container, RecentCallsFragment.newInstance())
-                    .commit();
+
         } else if (itemId == R.id.navigation_contacts) {
 
         } else {
@@ -118,14 +117,34 @@ public final class MainActivity
         navigation.setSelectedItemId(R.id.navigation_recent_calls);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerCallSdkListeners();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterCallSdkListeners();
+    }
+
     private void initCallSdk() {
         ILVCallManager
                 .getInstance()
                 .init(new ILVCallConfig()
                         .setNotificationListener(this)
                         .setAutoBusy(true));
+    }
+
+    private void registerCallSdkListeners() {
         ILVCallManager.getInstance().addIncomingListener(this);
         ILVCallManager.getInstance().addCallListener(this);
+    }
+
+    private void unregisterCallSdkListeners() {
+        ILVCallManager.getInstance().removeCallListener(this);
+        ILVCallManager.getInstance().removeIncomingListener(this);
     }
 
     private void bindViews() {
@@ -203,8 +222,8 @@ public final class MainActivity
     }
 
     @Override
-    public void startCalling(List<String> calledAccounts) {
-
+    public void onStartCalling(ArrayList<String> calledIds) {
+        gotoCall(ILiveLoginManager.getInstance().getMyUserId(), 0, ILVCallConstants.CALL_TYPE_VIDEO, calledIds);
     }
 
     @Override
@@ -215,6 +234,35 @@ public final class MainActivity
     @Override
     public void onNewIncomingCall(int callId, int callType, ILVIncomingNotification notification) {
         Log.d(TAG, "onNewIncomingCall, callId: " + callId + ", callType: " + callType);
+        Log.d(TAG, "onNewIncomingCall, sponsorId: " + notification.getSponsorId() + ", sender: " + notification.getSender() + ", members: " + notification.getMembersString());
+        final String membersMsg;
+        if (notification.getMembersString() == null) {
+            membersMsg = "";
+        } else {
+            membersMsg = "\n其他参与者：" + notification.getMembersString();
+        }
+        new AlertDialog.Builder(this)
+                .setTitle("新会议请求")
+                .setMessage("来电发起人：" + notification.getSponsorId() + membersMsg)
+                .setNegativeButton("拒绝", null)
+                .setPositiveButton("接受", (dialog, which) -> {
+                    final ArrayList<String> members = new ArrayList<>();
+                    if (notification.getMembers() != null) {
+                        members.addAll(notification.getMembers());
+                    }
+                    gotoCall(notification.getSponsorId(), callId, callType, members);
+                })
+                .show();
+    }
+
+    private void gotoCall(String sponsor, int callId, int callType, ArrayList<String> members) {
+        Intent intent = new Intent();
+        intent.setClass(this, CallActivity.class);
+        intent.putExtra(getString(R.string.intent_extra_sponsor), sponsor);
+        intent.putExtra(getString(R.string.intent_extra_call_id), callId);
+        intent.putExtra(getString(R.string.intent_extra_call_type), callType);
+        intent.putExtra(getString(R.string.intent_extra_members), members);
+        startActivity(intent);
     }
 
     @Override

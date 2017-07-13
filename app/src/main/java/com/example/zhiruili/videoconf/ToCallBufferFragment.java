@@ -24,21 +24,21 @@ import java.util.concurrent.TimeUnit;
 
 public final class ToCallBufferFragment extends Fragment {
 
-    private static final String ARG_INIT_ACCOUNTS = "init_accounts";
+    private static final String ARG_INIT_IDS = "init_ids";
 
     private FlexboxLayout mWaitedToCalledBuffer;
-    private EditText mCalledAccountEditText;
-    private AppCompatImageButton mAddCalledAccountButton;
+    private EditText mCalledIdEditText;
+    private AppCompatImageButton mAddCalledIdButton;
     private AppCompatButton mStartCallingButton;
-    private ArrayList<String> mAccounts;
+    private ArrayList<String> mInitCallIds;
     private OnFragmentInteractionListener mInteractionListener;
 
     public ToCallBufferFragment() { }
 
-    public static ToCallBufferFragment newInstance(ArrayList<String> initAccounts) {
+    public static ToCallBufferFragment newInstance(ArrayList<String> initIds) {
         ToCallBufferFragment fragment = new ToCallBufferFragment();
         Bundle args = new Bundle();
-        args.putStringArrayList(ARG_INIT_ACCOUNTS, initAccounts);
+        args.putStringArrayList(ARG_INIT_IDS, initIds);
         fragment.setArguments(args);
         return fragment;
     }
@@ -47,7 +47,7 @@ public final class ToCallBufferFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mAccounts = getArguments().getStringArrayList(ARG_INIT_ACCOUNTS);
+            mInitCallIds = getArguments().getStringArrayList(ARG_INIT_IDS);
         }
     }
 
@@ -57,37 +57,37 @@ public final class ToCallBufferFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_to_call_buffer, container, false);
         bindViews(rootView);
         initViews();
-        addAccountsToBuffer(mAccounts);
+        addIdsToBuffer(mInitCallIds);
         return rootView;
     }
 
-    public void addAccountToBuffer(@NonNull final String account) {
+    public void addIdToBuffer(@NonNull final String id) {
         final int count = mWaitedToCalledBuffer.getFlexItemCount();
         View tagView = null;
         for (int i = 0; i < count; ++i) {
-            if (account.equals(mWaitedToCalledBuffer.getFlexItemAt(i).getTag().toString())) {
+            if (id.equals(mWaitedToCalledBuffer.getFlexItemAt(i).getTag().toString())) {
                 tagView = mWaitedToCalledBuffer.getFlexItemAt(i);
                 mWaitedToCalledBuffer.removeViewAt(i);
                 break;
             }
         }
         if (tagView == null) {
-            tagView = ViewCreator.createTag(getActivity(), account, account, mWaitedToCalledBuffer::removeView);
+            tagView = ViewCreator.createTag(getActivity(), id, id, mWaitedToCalledBuffer::removeView);
         }
         mWaitedToCalledBuffer.addView(tagView);
     }
 
-    private void addAccountsToBuffer(List<String> accounts) {
+    private void addIdsToBuffer(List<String> accounts) {
         if (accounts == null) {
             return;
         }
-        accounts.forEach(this::addAccountToBuffer);
+        accounts.forEach(this::addIdToBuffer);
     }
 
     private void bindViews(View rootView) {
         mWaitedToCalledBuffer = (FlexboxLayout) rootView.findViewById(R.id.waited_to_called_buffer);
-        mCalledAccountEditText = (EditText) rootView.findViewById(R.id.et_called_account_input);
-        mAddCalledAccountButton = (AppCompatImageButton) rootView.findViewById(R.id.ib_add_called_account);
+        mCalledIdEditText = (EditText) rootView.findViewById(R.id.et_called_id_input);
+        mAddCalledIdButton = (AppCompatImageButton) rootView.findViewById(R.id.ib_add_called_id);
         mStartCallingButton = (AppCompatButton) rootView.findViewById(R.id.btn_start_calling);
     }
 
@@ -99,27 +99,27 @@ public final class ToCallBufferFragment extends Fragment {
                 .subscribe(show -> mStartCallingButton.setVisibility(show ? View.VISIBLE : View.GONE));
 
         RxTextView
-                .afterTextChangeEvents(mCalledAccountEditText)
-                .map(_ignore -> mCalledAccountEditText.getText().toString().trim())
+                .afterTextChangeEvents(mCalledIdEditText)
+                .map(_ignore -> mCalledIdEditText.getText().toString().trim())
                 .map(text -> text.length() > 0)
-                .subscribe(show -> mAddCalledAccountButton.setVisibility(show ? View.VISIBLE : View.GONE));
+                .subscribe(show -> mAddCalledIdButton.setVisibility(show ? View.VISIBLE : View.GONE));
 
         RxView
-                .clicks(mAddCalledAccountButton)
-                .throttleFirst(500, TimeUnit.MILLISECONDS)
-                .map(_ignore -> mCalledAccountEditText.getText().toString().trim())
-                .doOnNext(account -> {
-                    if (!TextUtils.isUserNameValid(account)) {
-                        mCalledAccountEditText.setError(getString(R.string.error_invalid_user_name));
+                .clicks(mAddCalledIdButton)
+                .throttleFirst(getResources().getInteger(R.integer.shake_throttle), TimeUnit.MILLISECONDS)
+                .map(_ignore -> mCalledIdEditText.getText().toString().trim())
+                .doOnNext(id -> {
+                    if (!TextUtils.isUserNameValid(id)) {
+                        mCalledIdEditText.setError(getString(R.string.error_invalid_user_name));
                     }
                 })
                 .filter(TextUtils::isUserNameValid)
-                .doOnNext(_ignore -> mCalledAccountEditText.setText(""))
-                .subscribe(this::addAccountToBuffer);
+                .doOnNext(_ignore -> mCalledIdEditText.setText(""))
+                .subscribe(this::addIdToBuffer);
 
         RxView
                 .clicks(mStartCallingButton)
-                .throttleFirst(500, TimeUnit.MILLISECONDS)
+                .throttleFirst(getResources().getInteger(R.integer.shake_throttle), TimeUnit.MILLISECONDS)
                 .filter(_ignore -> mWaitedToCalledBuffer.getFlexItemCount() > 0)
                 .map(_ignore -> mWaitedToCalledBuffer.getChildCount())
                 .map(count ->
@@ -129,7 +129,7 @@ public final class ToCallBufferFragment extends Fragment {
                             }
                         }}
                 )
-                .subscribe(mInteractionListener::startCalling);
+                .subscribe(mInteractionListener::onStartCalling);
     }
 
     @Override
@@ -150,6 +150,6 @@ public final class ToCallBufferFragment extends Fragment {
     }
 
     public interface OnFragmentInteractionListener {
-        void startCalling(List<String> calledAccounts);
+        void onStartCalling(ArrayList<String> calledIds);
     }
 }

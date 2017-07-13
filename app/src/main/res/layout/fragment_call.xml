@@ -1,7 +1,58 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".CallFragment">
 
-</FrameLayout>
+    <com.tencent.ilivesdk.view.AVRootView
+        android:id="@+id/call_av_root_view"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_width="0dp"
+        android:layout_height="0dp" />
+
+    <android.support.v7.widget.AppCompatImageButton
+        android:id="@+id/btn_end_call"
+        android:src="@drawable/ic_call_end_black_24dp"
+        android:tint="@android:color/white"
+        android:background="@android:color/holo_red_light"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginBottom="@dimen/activity_vertical_margin"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
+        android:layout_marginEnd="@dimen/activity_horizontal_margin"
+        android:layout_width="@dimen/call_control_button_size"
+        android:layout_height="@dimen/call_control_button_size" />
+
+    <android.support.v7.widget.AppCompatImageButton
+        android:id="@+id/btn_turn_on_camera"
+        android:src="@drawable/ic_videocam_black_24dp"
+        android:tint="@android:color/white"
+        android:background="@android:color/darker_gray"
+        android:visibility="gone"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
+        android:layout_marginEnd="@dimen/activity_horizontal_margin"
+        android:layout_width="@dimen/call_control_button_size_small"
+        android:layout_height="@dimen/call_control_button_size_small" />
+
+    <android.support.v7.widget.AppCompatImageButton
+        android:id="@+id/btn_turn_off_camera"
+        android:src="@drawable/ic_videocam_off_black_24dp"
+        android:tint="@android:color/white"
+        android:background="@android:color/darker_gray"
+        android:visibility="visible"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
+        android:layout_marginEnd="@dimen/activity_horizontal_margin"
+        android:layout_width="@dimen/call_control_button_size_small"
+        android:layout_height="@dimen/call_control_button_size_small" />
+
+</android.support.constraint.ConstraintLayout>
