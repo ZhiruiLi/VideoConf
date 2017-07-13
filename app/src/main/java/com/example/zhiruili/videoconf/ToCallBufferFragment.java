@@ -3,6 +3,8 @@ package com.example.zhiruili.videoconf;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.AppCompatImageButton;
@@ -46,14 +48,16 @@ public final class ToCallBufferFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mInitCallIds = getArguments().getStringArrayList(ARG_INIT_IDS);
+        Bundle args = getArguments();
+        if (args != null) {
+            mInitCallIds = args.getStringArrayList(ARG_INIT_IDS);
         }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         View rootView = inflater.inflate(R.layout.fragment_to_call_buffer, container, false);
         bindViews(rootView);
         initViews();
@@ -63,6 +67,10 @@ public final class ToCallBufferFragment extends Fragment {
 
     public void addIdToBuffer(@NonNull final String id) {
         final int count = mWaitedToCalledBuffer.getFlexItemCount();
+        if (count >= AppConstants.MAX_CALL_NUM) {
+            Snackbar.make(mWaitedToCalledBuffer, R.string.error_unable_to_add_more_members, Snackbar.LENGTH_SHORT).show();
+            return;
+        }
         View tagView = null;
         for (int i = 0; i < count; ++i) {
             if (id.equals(mWaitedToCalledBuffer.getFlexItemAt(i).getTag().toString())) {
@@ -77,11 +85,29 @@ public final class ToCallBufferFragment extends Fragment {
         mWaitedToCalledBuffer.addView(tagView);
     }
 
-    private void addIdsToBuffer(List<String> accounts) {
+    public void addIdsToBuffer(@Nullable List<String> accounts) {
         if (accounts == null) {
             return;
         }
         accounts.forEach(this::addIdToBuffer);
+    }
+
+    public void removeAllBufferIds() {
+        mWaitedToCalledBuffer.removeAllViews();
+    }
+
+    public void removeBufferIdAt(int idx) {
+        mWaitedToCalledBuffer.removeViewAt(idx);
+    }
+
+    public void removeBufferId(String id) {
+        final int count = mWaitedToCalledBuffer.getFlexItemCount();
+        for (int i = 0; i < count; ++i) {
+            if (mWaitedToCalledBuffer.getFlexItemAt(i).getTag().toString().equals(id)) {
+                mWaitedToCalledBuffer.removeViewAt(i);
+                break;
+            }
+        }
     }
 
     private void bindViews(View rootView) {

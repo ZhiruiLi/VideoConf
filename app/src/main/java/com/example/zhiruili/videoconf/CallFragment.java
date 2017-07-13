@@ -55,6 +55,7 @@ public final class CallFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         final View rootView = inflater.inflate(R.layout.fragment_call, container, false);
         final AVRootView mAvRootView = (AVRootView) rootView.findViewById(R.id.call_av_root_view);
         mInteractionListener.onCreateAvRootView(mAvRootView);
@@ -82,9 +83,13 @@ public final class CallFragment extends Fragment {
                 .subscribe(_ignore -> mInteractionListener.onActionSwitchCamera(true));
 
         mAvRootView.setSubCreatedListener(() -> {
+            final int count = mAvRootView.getVideoGroup().getChildCount();
+            if (count <= 1) {
+                return;
+            }
             mAvRootView.swapVideoView(0, 1);
-            for (int i = 1; i < ILiveConstants.MAX_AV_VIDEO_NUM; ++i) {
-                final int index = i;
+            for (int i = 1; i < count; ++i) {
+                final int currIndex = i;
                 AVVideoView minorView = mAvRootView.getViewByIndex(i);
                 if (ILiveLoginManager.getInstance().getMyUserId().equals(minorView.getIdentifier())) {
                     minorView.setMirror(true);
@@ -93,7 +98,7 @@ public final class CallFragment extends Fragment {
                 minorView.setGestureListener(new GestureDetector.SimpleOnGestureListener() {
                     @Override
                     public boolean onSingleTapConfirmed(MotionEvent e) {
-                        mAvRootView.swapVideoView(0, index);
+                        mAvRootView.swapVideoView(0, currIndex);
                         return false;
                     }
                 });

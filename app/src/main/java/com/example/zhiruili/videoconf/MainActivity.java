@@ -125,8 +125,8 @@ public final class MainActivity
 
     @Override
     protected void onPause() {
-        super.onPause();
         unregisterCallSdkListeners();
+        super.onPause();
     }
 
     private void initCallSdk() {
@@ -205,7 +205,6 @@ public final class MainActivity
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         if (mHasLogin) {
             ILiveHelper
                     .logout()
@@ -219,6 +218,7 @@ public final class MainActivity
                     );
             mHasLogin = false;
         }
+        super.onDestroy();
     }
 
     @Override
@@ -243,7 +243,7 @@ public final class MainActivity
         }
         new AlertDialog.Builder(this)
                 .setTitle("新会议请求")
-                .setMessage("来电发起人：" + notification.getSponsorId() + membersMsg)
+                .setMessage("会议发起人：" + notification.getSponsorId() + membersMsg)
                 .setNegativeButton("拒绝", null)
                 .setPositiveButton("接受", (dialog, which) -> {
                     final ArrayList<String> members = new ArrayList<>();

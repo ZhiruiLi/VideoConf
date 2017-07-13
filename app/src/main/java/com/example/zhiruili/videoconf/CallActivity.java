@@ -5,12 +5,11 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.GestureDetector;
-import android.view.MotionEvent;
 import android.view.Window;
 import android.view.WindowManager;
 
 import com.tencent.av.sdk.AVView;
+import com.tencent.callsdk.ILVCallConstants;
 import com.tencent.callsdk.ILVCallListener;
 import com.tencent.callsdk.ILVCallManager;
 import com.tencent.callsdk.ILVCallOption;
@@ -18,13 +17,12 @@ import com.tencent.ilivesdk.ILiveCallBack;
 import com.tencent.ilivesdk.ILiveConstants;
 import com.tencent.ilivesdk.core.ILiveLoginManager;
 import com.tencent.ilivesdk.view.AVRootView;
-import com.tencent.ilivesdk.view.AVVideoView;
 
 import java.util.ArrayList;
 
 public final class CallActivity
         extends AppCompatActivity
-        implements CallFragment.OnFragmentInteractionListener, ILiveCallBack, ILVCallListener {
+        implements CallFragment.OnFragmentInteractionListener, ILVCallListener {
 
     private static final String TAG = CallActivity.class.getSimpleName();
     private AVRootView mAvRootView;
@@ -32,6 +30,8 @@ public final class CallActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // full screen
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_call);
@@ -39,6 +39,7 @@ public final class CallActivity
         if (actionBar != null) {
             actionBar.hide();
         }
+
         Intent intent = getIntent();
         final int callId = intent.getIntExtra(getString(R.string.intent_extra_call_id), -1);
         final String sponsor = intent.getStringExtra(getString(R.string.intent_extra_sponsor));
@@ -46,15 +47,31 @@ public final class CallActivity
         if (callId == -1 || sponsor == null || members == null) {
             throw new IllegalArgumentException("should have intent extra of call_id, sponsor and members");
         }
+
         CallFragment fragment = CallFragment.newInstance(callId, sponsor, members);
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.call_main_container, fragment)
                 .commit();
+
+        ILVCallOption option = new ILVCallOption(sponsor).setCallType(ILVCallConstants.CALL_TYPE_VIDEO);
         if (callId == 0) {
-            ILVCallManager.getInstance().makeMutiCall(members, new ILVCallOption(sponsor), this);
+
+            ILVCallManager.getInstance().makeMutiCall(members, option, new ILiveCallBack() {
+
+                @Override
+                public void onSuccess(Object data) {
+                    Log.d(TAG, "call success");
+                }
+
+                @Override
+                public void onError(String module, int errCode, String errMsg) {
+                    Log.d(TAG, "call error, module: " + module + ", errorCode: " + errCode + ", errorMessage: " + errMsg);
+                    finish();
+                }
+            });
         } else {
-            ILVCallManager.getInstance().acceptCall(callId, new ILVCallOption(sponsor));
+            ILVCallManager.getInstance().acceptCall(callId, option);
         }
     }
 
@@ -97,23 +114,9 @@ public final class CallActivity
         super.onDestroy();
     }
 
-    // ILiveCallBack
-    @Override
-    public void onSuccess(Object data) {
-        Log.d(TAG, "call success");
-        finish();
-    }
-
-    // ILiveCallBack
-    @Override
-    public void onError(String module, int errCode, String errMsg) {
-        Log.d(TAG, "call error, module: " + module + ", errorCode: " + errCode + ", errorMessage: " + errMsg);
-        finish();
-    }
-
     @Override
     public void onCallEstablish(int callId) {
-
+        Log.d(TAG, "call establish, callId: " + callId);
     }
 
     @Override
@@ -124,6 +127,7 @@ public final class CallActivity
 
     @Override
     public void onException(int iExceptionId, int errCode, String errMsg) {
+        Log.d(TAG, "onException, exceptionId: " + iExceptionId + ", errorCode: " + errCode + ", errorMessage: " + errMsg);
         finish();
     }
 }

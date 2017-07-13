@@ -46,5 +46,6 @@
     <string name="label_start_calling_btn">发起视频会议</string>
     <string name="logout">注销</string>
     <string name="label_logout_success">注销成功</string>
+    <string name="error_unable_to_add_more_members">无法添加更多的会议成员</string>
 
 </resources>
