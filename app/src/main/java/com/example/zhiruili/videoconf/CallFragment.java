@@ -3,12 +3,17 @@ package com.example.zhiruili.videoconf;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.jakewharton.rxbinding2.view.RxView;
+import com.tencent.ilivesdk.ILiveConstants;
+import com.tencent.ilivesdk.core.ILiveLoginManager;
 import com.tencent.ilivesdk.view.AVRootView;
+import com.tencent.ilivesdk.view.AVVideoView;
 
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
@@ -57,7 +62,7 @@ public final class CallFragment extends Fragment {
         RxView
                 .clicks(rootView.findViewById(R.id.btn_end_call))
                 .throttleFirst(getResources().getInteger(R.integer.shake_throttle), TimeUnit.MICROSECONDS)
-                .subscribe(_ignore -> mInteractionListener.onEndCall(mCallId, mSponsor, mMembers));
+                .subscribe(_ignore -> mInteractionListener.onActionEndCall(mCallId, mSponsor, mMembers));
 
         final View turnOffCameraBtn = rootView.findViewById(R.id.btn_turn_off_camera);
         final View turnOnCameraBtn = rootView.findViewById(R.id.btn_turn_on_camera);
@@ -67,14 +72,33 @@ public final class CallFragment extends Fragment {
                 .throttleFirst(getResources().getInteger(R.integer.shake_throttle), TimeUnit.MICROSECONDS)
                 .doOnNext(_ignore -> turnOnCameraBtn.setVisibility(View.VISIBLE))
                 .doOnNext(_ignore -> turnOffCameraBtn.setVisibility(View.GONE))
-                .subscribe(_ignore -> mInteractionListener.onSwitchCamera(false));
+                .subscribe(_ignore -> mInteractionListener.onActionSwitchCamera(false));
 
         RxView
                 .clicks(turnOnCameraBtn)
                 .throttleFirst(getResources().getInteger(R.integer.shake_throttle), TimeUnit.MICROSECONDS)
                 .doOnNext(_ignore -> turnOffCameraBtn.setVisibility(View.VISIBLE))
                 .doOnNext(_ignore -> turnOnCameraBtn.setVisibility(View.GONE))
-                .subscribe(_ignore -> mInteractionListener.onSwitchCamera(true));
+                .subscribe(_ignore -> mInteractionListener.onActionSwitchCamera(true));
+
+        mAvRootView.setSubCreatedListener(() -> {
+            mAvRootView.swapVideoView(0, 1);
+            for (int i = 1; i < ILiveConstants.MAX_AV_VIDEO_NUM; ++i) {
+                final int index = i;
+                AVVideoView minorView = mAvRootView.getViewByIndex(i);
+                if (ILiveLoginManager.getInstance().getMyUserId().equals(minorView.getIdentifier())) {
+                    minorView.setMirror(true);
+                }
+                minorView.setDragable(true);
+                minorView.setGestureListener(new GestureDetector.SimpleOnGestureListener() {
+                    @Override
+                    public boolean onSingleTapConfirmed(MotionEvent e) {
+                        mAvRootView.swapVideoView(0, index);
+                        return false;
+                    }
+                });
+            }
+        });
 
         return rootView;
     }
@@ -97,8 +121,8 @@ public final class CallFragment extends Fragment {
     }
 
     public interface OnFragmentInteractionListener {
-        void onEndCall(int callId, String sponsor, ArrayList<String> members);
+        void onActionEndCall(int callId, String sponsor, ArrayList<String> members);
         void onCreateAvRootView(AVRootView avView);
-        void onSwitchCamera(boolean enableCamera);
+        void onActionSwitchCamera(boolean enableCamera);
     }
 }

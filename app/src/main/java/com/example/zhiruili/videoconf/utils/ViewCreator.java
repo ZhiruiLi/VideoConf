@@ -17,10 +17,4 @@ public final class ViewCreator {
         tagView.setOnClickListener(listener);
         return tagView;
     }
-
-    private static int scaleDp(Context context, int sizeInDp) {
-        float scale = context.getResources().getDisplayMetrics().density;
-        return (int) (sizeInDp * scale + 0.5f);
-    }
-
 }
