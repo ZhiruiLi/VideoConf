@@ -13,7 +13,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.ViewGroup;
 
-import com.example.zhiruili.videoconf.account.ILiveHelper;
+import com.example.zhiruili.utils.ViewUtils;
+import com.example.zhiruili.videoconf.call.account.ILiveHelper;
+import com.example.zhiruili.videoconf.call.constants.CallResultCode;
 import com.tencent.callsdk.ILVCallConfig;
 import com.tencent.callsdk.ILVCallConstants;
 import com.tencent.callsdk.ILVCallListener;
@@ -41,6 +43,10 @@ public final class MainActivity
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private ViewGroup mMainContainer;
+
+    private static final class RequestCode {
+        public static final int REQ_CALL = 0;
+    }
 
     // 是否登录
     private boolean mHasLogin = false;
@@ -109,6 +115,7 @@ public final class MainActivity
                                 gotoLogin();
                             });
         }
+        ViewUtils.hideKeyboard(this);
     }
 
     private void initViews() {
@@ -151,11 +158,52 @@ public final class MainActivity
         mMainContainer = (ViewGroup) findViewById(R.id.main_container);
     }
 
+    private static final int REQUEST_CALL = 0;
+
     private void gotoLogin() {
         Intent intent = new Intent();
         intent.setClass(this, LoginActivity.class);
-        startActivity(intent);
+        startActivityForResult(intent, REQUEST_CALL);
         finish();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_CALL) {
+            switch (resultCode) {
+                case CallResultCode.SPONSOR_CANCEL:
+                    Log.d(TAG, "sponsor cancel");
+                    break;
+                case CallResultCode.DISCONNECT:
+                    Log.d(TAG, "disconnect");
+                    break;
+                case CallResultCode.FAILED:
+                    Log.d(TAG, "failed");
+                    break;
+                case CallResultCode.HANGUP:
+                    Log.d(TAG, "hangup");
+                    break;
+                case CallResultCode.LOCAL_CANCEL:
+                    Log.d(TAG, "local cancel");
+                    break;
+                case CallResultCode.NOT_EXIST:
+                    Log.d(TAG, "not exist");
+                    break;
+                case CallResultCode.RESPONDER_LINEBUSY:
+                    Log.d(TAG, "responder line busy");
+                    break;
+                case CallResultCode.RESPONDER_REFUSE:
+                    Log.d(TAG, "responder refuse");
+                    break;
+                case CallResultCode.SPONSOR_TIMEOUT:
+                    Log.d(TAG, "sponsor timeout");
+                    break;
+                default:
+                    Log.d(TAG, "unknown result code");
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
     }
 
     @Override
@@ -256,13 +304,7 @@ public final class MainActivity
     }
 
     private void gotoCall(String sponsor, int callId, int callType, ArrayList<String> members) {
-        Intent intent = new Intent();
-        intent.setClass(this, CallActivity.class);
-        intent.putExtra(getString(R.string.intent_extra_sponsor), sponsor);
-        intent.putExtra(getString(R.string.intent_extra_call_id), callId);
-        intent.putExtra(getString(R.string.intent_extra_call_type), callType);
-        intent.putExtra(getString(R.string.intent_extra_members), members);
-        startActivity(intent);
+        startActivityForResult(CallActivity.createIntent(this, callId, callType, sponsor, members), RequestCode.REQ_CALL);
     }
 
     @Override

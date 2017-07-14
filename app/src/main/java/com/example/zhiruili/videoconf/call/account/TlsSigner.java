@@ -1,6 +1,6 @@
-package com.example.zhiruili.videoconf.account;
+package com.example.zhiruili.videoconf.call.account;
 
-import com.example.zhiruili.videoconf.account.errors.AccountException;
+import com.example.zhiruili.videoconf.call.errors.AccountException;
 import com.tencent.ilivesdk.ILiveCallBack;
 import com.tencent.ilivesdk.core.ILiveLoginManager;
 

@@ -13,10 +13,10 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 
 import com.example.zhiruili.utils.ViewUtils;
-import com.example.zhiruili.videoconf.account.ILiveHelper;
-import com.example.zhiruili.videoconf.account.TlsSigner;
-import com.example.zhiruili.videoconf.account.errors.AccountException;
-import com.example.zhiruili.videoconf.account.errors.ErrorCode;
+import com.example.zhiruili.videoconf.call.account.ILiveHelper;
+import com.example.zhiruili.videoconf.call.account.TlsSigner;
+import com.example.zhiruili.videoconf.call.errors.AccountException;
+import com.example.zhiruili.videoconf.call.errors.ErrorCode;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
@@ -82,6 +82,7 @@ public final class LoginActivity extends AppCompatActivity {
         if (mLoginDisposable != null) {
             return;
         }
+        ViewUtils.hideKeyboard(this);
         ViewUtils.clearErrors(mUserNameView, mPasswordView);
         String userName = mUserNameView.getText().toString();
         String password = mPasswordView.getText().toString();
@@ -136,6 +137,7 @@ public final class LoginActivity extends AppCompatActivity {
         if (mLoginDisposable != null) {
             return;
         }
+        ViewUtils.hideKeyboard(this);
         ViewUtils.clearErrors(mUserNameView, mPasswordView);
         String userName = mUserNameView.getText().toString();
         String password = mPasswordView.getText().toString();

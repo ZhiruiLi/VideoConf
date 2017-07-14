@@ -1,5 +1,6 @@
 package com.example.zhiruili.videoconf;
 
+import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -27,6 +28,27 @@ public final class CallActivity
     private static final String TAG = CallActivity.class.getSimpleName();
     private AVRootView mAvRootView;
 
+    public static final class IntentExtras {
+        public static final class Request {
+            public static final String CALL_ID = "call_id";
+            public static final String CALL_TYPE = "call_type";
+            public static final String SPONSOR = "sponsor";
+            public static final String MEMBERS = "members";
+        }
+        public static final class Result {
+            public static final String MESSAGE = "message";
+        }
+    }
+
+    public static Intent createIntent(Context context, int callId, int callType, String sponsor, ArrayList<String> members) {
+        return new Intent()
+                .setClass(context, CallActivity.class)
+                .putExtra(IntentExtras.Request.CALL_ID, callId)
+                .putExtra(IntentExtras.Request.CALL_TYPE, callType)
+                .putExtra(IntentExtras.Request.SPONSOR, sponsor)
+                .putExtra(IntentExtras.Request.MEMBERS, members);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,10 +63,11 @@ public final class CallActivity
         }
 
         Intent intent = getIntent();
-        final int callId = intent.getIntExtra(getString(R.string.intent_extra_call_id), -1);
-        final String sponsor = intent.getStringExtra(getString(R.string.intent_extra_sponsor));
-        final ArrayList<String> members = intent.getStringArrayListExtra(getString(R.string.intent_extra_members));
-        if (callId == -1 || sponsor == null || members == null) {
+        final int callId = intent.getIntExtra(IntentExtras.Request.CALL_ID, -1);
+        final int callType = intent.getIntExtra(IntentExtras.Request.CALL_TYPE, -1);
+        final String sponsor = intent.getStringExtra(IntentExtras.Request.SPONSOR);
+        final ArrayList<String> members = intent.getStringArrayListExtra(IntentExtras.Request.MEMBERS);
+        if (callId == -1 || callType == -1 || sponsor == null || members == null) {
             throw new IllegalArgumentException("should have intent extra of call_id, sponsor and members");
         }
 
@@ -54,10 +77,10 @@ public final class CallActivity
                 .replace(R.id.call_main_container, fragment)
                 .commit();
 
-        ILVCallOption option = new ILVCallOption(sponsor).setCallType(ILVCallConstants.CALL_TYPE_VIDEO);
+        ILVCallOption option = new ILVCallOption(sponsor);
         if (callId == 0) {
 
-            ILVCallManager.getInstance().makeMutiCall(members, option, new ILiveCallBack() {
+            ILVCallManager.getInstance().makeMutiCall(members, option.setCallType(ILVCallConstants.CALL_TYPE_VIDEO), new ILiveCallBack() {
 
                 @Override
                 public void onSuccess(Object data) {
@@ -71,7 +94,7 @@ public final class CallActivity
                 }
             });
         } else {
-            ILVCallManager.getInstance().acceptCall(callId, option);
+            ILVCallManager.getInstance().acceptCall(callId, option.setCallType(callType));
         }
     }
 
@@ -122,12 +145,17 @@ public final class CallActivity
     @Override
     public void onCallEnd(int callId, int endResult, String endInfo) {
         Log.d(TAG, "onCallEnd, callId: " + callId + ", endResult: " + endResult + ", " + endInfo);
+        setResult(endResult, new Intent().putExtra(IntentExtras.Result.MESSAGE, endInfo));
         finish();
     }
 
     @Override
     public void onException(int iExceptionId, int errCode, String errMsg) {
         Log.d(TAG, "onException, exceptionId: " + iExceptionId + ", errorCode: " + errCode + ", errorMessage: " + errMsg);
-        finish();
+    }
+
+    @Override
+    public void onBackPressed() {
+        Log.d(TAG, "onBackPress");
     }
 }

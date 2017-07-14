@@ -1,4 +1,4 @@
-package com.example.zhiruili.videoconf.account.errors;
+package com.example.zhiruili.videoconf.call.errors;
 
 import android.text.TextUtils;
 

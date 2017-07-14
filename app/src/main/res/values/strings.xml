@@ -34,12 +34,6 @@
     <string name="title_contacts">联系人</string>
     <string name="intent_extra_has_login" translatable="false">has_login</string>
 
-    <!-- CallActivity -->
-    <string name="intent_extra_sponsor" translatable="false">sponsor</string>
-    <string name="intent_extra_call_id" translatable="false">call_id</string>
-    <string name="intent_extra_call_type" translatable="false">call_type</string>
-    <string name="intent_extra_members" translatable="false">members</string>
-
     <!-- ToCallBufferFragment -->
     <string name="label_called_id_input_hint">输入被呼叫号码</string>
     <string name="ib_add_called_party_description">添加被呼叫人</string>
