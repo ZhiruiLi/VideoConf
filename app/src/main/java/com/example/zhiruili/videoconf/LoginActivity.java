@@ -16,7 +16,7 @@ import com.example.zhiruili.utils.ViewUtils;
 import com.example.zhiruili.videoconf.call.account.ILiveHelper;
 import com.example.zhiruili.videoconf.call.account.TlsSigner;
 import com.example.zhiruili.videoconf.call.errors.AccountException;
-import com.example.zhiruili.videoconf.call.errors.ErrorCode;
+import com.example.zhiruili.videoconf.call.constants.AccountErrorCode;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
@@ -118,9 +118,9 @@ public final class LoginActivity extends AppCompatActivity {
                     showProgress(false);
                     if (err instanceof AccountException) {
                         AccountException aExp = (AccountException) err;
-                        if (aExp.getErrorCode() == ErrorCode.NO_SUCH_USER) {
+                        if (aExp.getErrorCode() == AccountErrorCode.NO_SUCH_USER) {
                             ViewUtils.putError(mUserNameView, getString(R.string.error_no_such_user));
-                        } else if (aExp.getErrorCode() == ErrorCode.WRONG_PASSWORD) {
+                        } else if (aExp.getErrorCode() == AccountErrorCode.WRONG_PASSWORD) {
                             ViewUtils.putError(mPasswordView, getString(R.string.error_incorrect_password));
                         } else {
                             Snackbar.make(mLoginContainer, getString(R.string.label_login_fail) + err.getMessage(), Snackbar.LENGTH_SHORT).show();
@@ -164,7 +164,7 @@ public final class LoginActivity extends AppCompatActivity {
                             Log.v(TAG, "register fail");
                             showProgress(false);
                             if (err instanceof AccountException) {
-                                if (((AccountException) err).getErrorCode() == ErrorCode.USER_EXISTED) {
+                                if (((AccountException) err).getErrorCode() == AccountErrorCode.USER_EXISTED) {
                                     ViewUtils.putError(mUserNameView, getString(R.string.error_user_existed));
                                 } else {
                                     Snackbar.make(mLoginContainer, getString(R.string.label_register_fail) + err.getMessage(), Snackbar.LENGTH_SHORT).show();
