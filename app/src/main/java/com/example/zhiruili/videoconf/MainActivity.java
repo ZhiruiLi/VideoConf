@@ -3,7 +3,6 @@ package com.example.zhiruili.videoconf;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -13,12 +12,10 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.ViewGroup;
 
-import com.example.zhiruili.utils.ViewUtils;
 import com.example.zhiruili.videoconf.call.account.ILiveHelper;
 import com.example.zhiruili.videoconf.call.constants.CallResultCode;
 import com.tencent.callsdk.ILVCallConfig;
 import com.tencent.callsdk.ILVCallConstants;
-import com.tencent.callsdk.ILVCallListener;
 import com.tencent.callsdk.ILVCallManager;
 import com.tencent.callsdk.ILVCallNotification;
 import com.tencent.callsdk.ILVCallNotificationListener;
@@ -38,11 +35,14 @@ public final class MainActivity
         extends AppCompatActivity
         implements
         ToCallBufferFragment.OnFragmentInteractionListener,
-        ILVCallNotificationListener, ILVIncomingListener, ILVCallListener {
+        RecentCallsFragment.OnFragmentInteractionListener,
+        ILVCallNotificationListener, ILVIncomingListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private ViewGroup mMainContainer;
+    private ToCallBufferFragment mToCallBuffer;
+    private RecentCallsFragment mRecentCallsList;
 
     private static final class RequestCode {
         public static final int REQ_CALL = 0;
@@ -50,26 +50,6 @@ public final class MainActivity
 
     // 是否登录
     private boolean mHasLogin = false;
-    // 当前导航 tab id
-    private int mCurrNavItemId = -1;
-    // 导航 tab 点击事件监听器
-    private BottomNavigationView.OnNavigationItemSelectedListener
-            mOnNavigationItemSelectedListener = item -> {
-
-        Log.d(TAG, "Select item " + item.getItemId());
-        int itemId = item.getItemId();
-        if (itemId == mCurrNavItemId) {
-            return false;
-        }
-        if (itemId == R.id.navigation_recent_calls) {
-
-        } else if (itemId == R.id.navigation_contacts) {
-
-        } else {
-            return false;
-        }
-        return true;
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,7 +66,6 @@ public final class MainActivity
         mHasLogin = intent.getBooleanExtra(getString(R.string.intent_extra_has_login), false);
         if (mHasLogin) {
             Log.v(TAG, "User has login");
-            initViews();
             initCallSdk();
             return;
         }
@@ -105,7 +84,6 @@ public final class MainActivity
                             _ignore -> {
                                 Log.v(TAG, "login success");
                                 mHasLogin = true;
-                                initViews();
                                 initCallSdk();
                             },
                             err -> {
@@ -115,13 +93,8 @@ public final class MainActivity
                                 gotoLogin();
                             });
         }
-        ViewUtils.hideKeyboard(this);
-    }
-
-    private void initViews() {
-        BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
-        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
-        navigation.setSelectedItemId(R.id.navigation_recent_calls);
+        mToCallBuffer = (ToCallBufferFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_to_call_buffer);
+        mRecentCallsList = (RecentCallsFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_recent_calls_list);
     }
 
     @Override
@@ -146,11 +119,9 @@ public final class MainActivity
 
     private void registerCallSdkListeners() {
         ILVCallManager.getInstance().addIncomingListener(this);
-        ILVCallManager.getInstance().addCallListener(this);
     }
 
     private void unregisterCallSdkListeners() {
-        ILVCallManager.getInstance().removeCallListener(this);
         ILVCallManager.getInstance().removeIncomingListener(this);
     }
 
@@ -275,6 +246,11 @@ public final class MainActivity
     }
 
     @Override
+    public void onListItemClick(String callId) {
+        mToCallBuffer.addIdToBuffer(callId);
+    }
+
+    @Override
     public void onRecvNotification(int callId, ILVCallNotification notification) {
         Log.d(TAG, "onRecvNotification, callId: " + callId);
     }
@@ -282,17 +258,20 @@ public final class MainActivity
     @Override
     public void onNewIncomingCall(int callId, int callType, ILVIncomingNotification notification) {
         Log.d(TAG, "onNewIncomingCall, callId: " + callId + ", callType: " + callType);
-        Log.d(TAG, "onNewIncomingCall, sponsorId: " + notification.getSponsorId() + ", sender: " + notification.getSender() + ", members: " + notification.getMembersString());
+        Log.d(TAG, "onNewIncomingCall, sponsorId: " + notification.getSponsorId() +
+                ", sender: " + notification.getSender() +
+                ", members: " + notification.getMembersString());
         final String membersMsg;
         if (notification.getMembersString() == null) {
             membersMsg = "";
         } else {
-            membersMsg = "\n其他参与者：" + notification.getMembersString();
+            membersMsg = "\n参与者：" + notification.getMembersString();
         }
         new AlertDialog.Builder(this)
                 .setTitle("新会议请求")
                 .setMessage("会议发起人：" + notification.getSponsorId() + membersMsg)
-                .setNegativeButton("拒绝", null)
+                .setNegativeButton("拒绝",
+                        (dialog, which) -> ILVCallManager.getInstance().rejectCall(callId))
                 .setPositiveButton("接受", (dialog, which) -> {
                     final ArrayList<String> members = new ArrayList<>();
                     if (notification.getMembers() != null) {
@@ -304,21 +283,13 @@ public final class MainActivity
     }
 
     private void gotoCall(String sponsor, int callId, int callType, ArrayList<String> members) {
-        startActivityForResult(CallActivity.createIntent(this, callId, callType, sponsor, members), RequestCode.REQ_CALL);
-    }
-
-    @Override
-    public void onCallEstablish(int callId) {
-        Log.d(TAG, "onCallEstablish, callId: " + callId);
-    }
-
-    @Override
-    public void onCallEnd(int callId, int endResult, String endInfo) {
-        Log.d(TAG, "onCallEnd, callId: " + callId + ", endResult: " + endResult);
-    }
-
-    @Override
-    public void onException(int iExceptionId, int errCode, String errMsg) {
-        Log.d(TAG, "onException, exceptionId: " + iExceptionId + ", errorCode: " + errCode + ", errMsg: " + errMsg);
+//        mRecentCallsList
+//                .updateCalls(members, callId != 0)
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(success -> {
+//                    Log.d(TAG, "gotoCall success = " + success);
+                    startActivityForResult(CallActivity.createIntent(this, callId, callType, sponsor, members), RequestCode.REQ_CALL);
+//                });
     }
 }

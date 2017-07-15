@@ -3,4 +3,5 @@
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="call_control_button_size">68dp</dimen>
     <dimen name="call_control_button_size_small">46dp</dimen>
+    <dimen name="text_margin">16dp</dimen>
 </resources>
