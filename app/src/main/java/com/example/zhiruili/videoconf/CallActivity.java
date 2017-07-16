@@ -104,8 +104,8 @@ public final class CallActivity
     @Override
     protected void onResume() {
         super.onResume();
-        ILVCallManager.getInstance().addCallListener(this);
         ILVCallManager.getInstance().onResume();
+        ILVCallManager.getInstance().addCallListener(this);
     }
 
     @Override
@@ -131,8 +131,8 @@ public final class CallActivity
 
     @Override
     protected void onPause() {
-        ILVCallManager.getInstance().onPause();
         ILVCallManager.getInstance().removeCallListener(this);
+        ILVCallManager.getInstance().onPause();
         super.onPause();
     }
 
