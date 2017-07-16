@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
 
+import com.example.zhiruili.videoconf.call.constants.CallResultCode;
 import com.tencent.av.sdk.AVView;
 import com.tencent.callsdk.ILVCallConstants;
 import com.tencent.callsdk.ILVCallListener;
@@ -27,6 +28,7 @@ public final class CallActivity
 
     private static final String TAG = CallActivity.class.getSimpleName();
     private AVRootView mAvRootView;
+    private int mCallId;
 
     public static final class IntentExtras {
         public static final class Request {
@@ -35,6 +37,7 @@ public final class CallActivity
             public static final String SPONSOR = "sponsor";
             public static final String MEMBERS = "members";
         }
+
         public static final class Result {
             public static final String MESSAGE = "message";
         }
@@ -63,22 +66,22 @@ public final class CallActivity
         }
 
         Intent intent = getIntent();
-        final int callId = intent.getIntExtra(IntentExtras.Request.CALL_ID, -1);
+        mCallId = intent.getIntExtra(IntentExtras.Request.CALL_ID, -1);
         final int callType = intent.getIntExtra(IntentExtras.Request.CALL_TYPE, -1);
         final String sponsor = intent.getStringExtra(IntentExtras.Request.SPONSOR);
         final ArrayList<String> members = intent.getStringArrayListExtra(IntentExtras.Request.MEMBERS);
-        if (callId == -1 || callType == -1 || sponsor == null || members == null) {
+        if (mCallId == -1 || callType == -1 || sponsor == null || members == null) {
             throw new IllegalArgumentException("should have intent extra of call_id, sponsor and members");
         }
 
-        CallFragment fragment = CallFragment.newInstance(callId, sponsor, members);
+        CallFragment fragment = CallFragment.newInstance(mCallId, sponsor, members);
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.call_main_container, fragment)
                 .commit();
 
         ILVCallOption option = new ILVCallOption(sponsor);
-        if (callId == 0) {
+        if (mCallId == 0) {
 
             ILVCallManager.getInstance().makeMutiCall(members, option.setCallType(ILVCallConstants.CALL_TYPE_VIDEO), new ILiveCallBack() {
 
@@ -94,7 +97,7 @@ public final class CallActivity
                 }
             });
         } else {
-            ILVCallManager.getInstance().acceptCall(callId, option.setCallType(callType));
+            ILVCallManager.getInstance().acceptCall(mCallId, option.setCallType(callType));
         }
     }
 
@@ -107,7 +110,9 @@ public final class CallActivity
 
     @Override
     public void onActionEndCall(int callId, String sponsor, ArrayList<String> members) {
-        ILVCallManager.getInstance().endCall(callId);
+        Log.d(TAG, "onActionEndCall, callId: " + callId);
+        // TODO: 这里如果我调用 `ILVCallManager.getInstance().endCall(mCallId)` 是不会触发 `onCallEnd` 的，这是为什么？
+        endCall();
     }
 
     @Override
@@ -157,5 +162,12 @@ public final class CallActivity
     @Override
     public void onBackPressed() {
         Log.d(TAG, "onBackPress");
+        endCall();
+    }
+
+    private void endCall() {
+        ILVCallManager.getInstance().endCall(mCallId);
+        setResult(CallResultCode.LOCAL_CANCEL, new Intent().putExtra(IntentExtras.Result.MESSAGE, "结束通话"));
+        finish();
     }
 }

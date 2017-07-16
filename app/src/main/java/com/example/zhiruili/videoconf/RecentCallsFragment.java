@@ -14,7 +14,6 @@ import android.view.ViewGroup;
 
 import com.example.zhiruili.videoconf.data.RecentCallsDbHelper;
 import com.example.zhiruili.videoconf.data.RecentCallsListContract.*;
-import com.example.zhiruili.videoconf.data.TestHelper;
 
 import java.util.List;
 

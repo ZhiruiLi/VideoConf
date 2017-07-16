@@ -283,13 +283,13 @@ public final class MainActivity
     }
 
     private void gotoCall(String sponsor, int callId, int callType, ArrayList<String> members) {
-//        mRecentCallsList
-//                .updateCalls(members, callId != 0)
-//                .subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe(success -> {
-//                    Log.d(TAG, "gotoCall success = " + success);
+        mRecentCallsList
+                .updateCalls(members, callId != 0)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(success -> {
+                    Log.d(TAG, "gotoCall success = " + success);
                     startActivityForResult(CallActivity.createIntent(this, callId, callType, sponsor, members), RequestCode.REQ_CALL);
-//                });
+                });
     }
 }
