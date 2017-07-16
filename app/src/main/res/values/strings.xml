@@ -33,6 +33,11 @@
     <string name="title_resents">通话记录</string>
     <string name="title_contacts">联系人</string>
     <string name="intent_extra_has_login" translatable="false">has_login</string>
+    <string name="label_incoming_call_title">新会议请求</string>
+    <string name="label_sponsor_prefix">会议发起人：</string>
+    <string name="label_refuse_btn">拒绝</string>
+    <string name="label_accept_btn">接受</string>
+    <string name="label_members">参与者：</string>
 
     <!-- ToCallBufferFragment -->
     <string name="label_called_id_input_hint">输入被呼叫号码</string>
@@ -42,6 +47,7 @@
     <string name="label_logout_success">注销成功</string>
     <string name="error_unable_to_add_more_members">无法添加更多的会议成员</string>
 
+    <!-- RecentCallsFragment -->
     <string name="label_call_in">呼入</string>
     <string name="label_call_out">呼出</string>
 

@@ -265,14 +265,14 @@ public final class MainActivity
         if (notification.getMembersString() == null) {
             membersMsg = "";
         } else {
-            membersMsg = "\n参与者：" + notification.getMembersString();
+            membersMsg = "\n" + getString(R.string.label_members) + notification.getMembersString();
         }
         new AlertDialog.Builder(this)
-                .setTitle("新会议请求")
-                .setMessage("会议发起人：" + notification.getSponsorId() + membersMsg)
-                .setNegativeButton("拒绝",
+                .setTitle(R.string.label_incoming_call_title)
+                .setMessage(getString(R.string.label_sponsor_prefix) + notification.getSponsorId() + membersMsg)
+                .setNegativeButton(R.string.label_refuse_btn,
                         (dialog, which) -> ILVCallManager.getInstance().rejectCall(callId))
-                .setPositiveButton("接受", (dialog, which) -> {
+                .setPositiveButton(R.string.label_accept_btn, (dialog, which) -> {
                     final ArrayList<String> members = new ArrayList<>();
                     if (notification.getMembers() != null) {
                         members.addAll(notification.getMembers());
